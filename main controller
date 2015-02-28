@@ -1,0 +1,470 @@
+// Forbidden Fruit Machine - main controller
+
+#include <Servo.h>   
+
+// include SPI, MP3 and SD libraries for the MP3 shield
+#include <SPI.h>
+#include <Adafruit_VS1053.h>
+#include <SD.h>
+
+// These are the pins used for the music maker shield
+#define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
+#define SHIELD_CS     7      // VS1053 chip select pin (output)
+#define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
+
+// These are common pins between breakout and shield
+#define CARDCS 4     // Card chip select pin
+// DREQ should be an Int pin, see http://arduino.cc/en/Reference/attachInterrupt
+#define DREQ 3       // VS1053 Data request, ideally an Interrupt pin
+
+Adafruit_VS1053_FilePlayer musicPlayer = 
+Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
+
+
+// - - - - - - - - - - - MOTORS + SHIELD 
+
+// include libraries for the motorshield
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
+
+// Create the motor shield object with the default I2C address
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+
+// Connect a stepper motor with 200 steps per revolution (1.8 degree)
+
+Adafruit_StepperMotor *Ymotor = AFMS.getStepper(200, 1);
+Adafruit_StepperMotor *Xmotor = AFMS.getStepper(200, 2);
+
+// Competiotion Pro joystick
+
+int button = 14;   // A0 analog pin, used as digital input 
+int leftRight = A2;
+int upDown = A1;
+long dropTime=0;
+
+
+//apple coordinates
+int x=0;
+int y=0;
+int initial_x=100;  //x after calibration
+int initial_y=720;    //y after calibration
+uint8_t mot_off_timeout_x=0; //switch motor off after timeout
+uint8_t mot_off_timeout_y=0; //switch motor off after timeout
+boolean debug=false;//true; //
+int drop_time=10;
+int drop_time_limit=200;
+int drop_wait=0; //counts loop-cycles until dropping is started after last joystick input
+unsigned long bgnd_music_timer;
+int bgnd_music_delay=1500; //time until music starts when moving apple around
+boolean playing_bgnd_music=false;
+Servo servo01;  // create servo objects 
+Servo servo02;  
+
+void setup() {
+
+// - - - - - - - - - - - MP3 SHIELD
+
+  musicPlayer.begin();  // initialise the music player
+  SD.begin(CARDCS);    // initialise the SD card
+ 
+  // Set volume for left, right channels. lower numbers == louder volume!
+  musicPlayer.setVolume(0,0);
+
+  // If DREQ is on an interrupt pin (on uno, #2 or #3) we can do background audio playing
+  musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);  // DREQ int
+ 
+
+// - - - - - - - - - - - MOTORS + SHIELD  
+  
+  AFMS.begin();  //
+
+  
+  // initialize the pins as inputs with pull up resistor
+  pinMode(button, INPUT_PULLUP);   // 
+  pinMode(leftRight, INPUT);       // 
+  pinMode(upDown, INPUT);          // 
+  pinMode(8,INPUT_PULLUP);        //end switches
+  pinMode(17,INPUT);
+  digitalWrite(17, HIGH);
+  //communication to LED copntroller (arduino pro mini)
+  pinMode(0,OUTPUT);
+  pinMode(1,OUTPUT);
+  pinMode(2,OUTPUT);
+  pinMode(5,OUTPUT);
+  digitalWrite(5,LOW); 
+  digitalWrite(2,LOW);
+  digitalWrite(1,LOW);
+  digitalWrite(0,LOW);
+  
+  //serial
+  if (debug)Serial.begin(9600); 
+  
+  
+  //move servos to initial position
+  servo01.attach(10);      // attaches the servo on pin 10 to the servo object
+  servo02.attach(9);       // attaches the servo on pin 9 to the servo object 
+  
+  servo01.write(90);       // sets the servo to the middle position 
+  servo02.write(120);       // sets the servo to the middle position
+  delay(1000);
+  servo01.detach();
+  servo02.detach();
+  
+  //calibration x
+  Serial.println("calibrate X");
+  while(digitalRead(8)){              // while x-end switch is not pushed
+   Xmotor->onestep(BACKWARD, DOUBLE); // move x-motor to the right
+  }
+
+  
+  //calibration y
+  Serial.println("calibrate Y");
+  while(digitalRead(A3)){             // while y-end switch is not pushed
+   Ymotor->onestep(BACKWARD, DOUBLE); // move y-motor down
+  }
+  
+  //drive apple to initial position
+
+  for (x=1040;x>initial_x;x--){  
+   Xmotor->onestep(FORWARD, DOUBLE);
+  }
+  for (y=0;y<initial_y;y++){
+   Ymotor->onestep(FORWARD, DOUBLE);
+  }
+  
+  
+  bgnd_music_timer=millis()+3000;
+}
+
+void loop() {   
+      //check end switches 
+      if (!digitalRead(8)){if(debug)Serial.println("end switch X hit!  ");}
+      if(!digitalRead(A3)){if(debug)Serial.println("end switch Y hit! ");} 
+
+      //--------------------------------------------------------------------check joystick 
+      //left/right
+      int dir_lr=0;
+      int tmp=analogRead(leftRight);
+      if (tmp<900) {
+        if (tmp<250) { dir_lr=1; /*right*/} else { dir_lr=-1;/*left*/}
+      }
+      
+      //up/down
+      int dir_ud=0;
+      tmp=analogRead(upDown);
+      if (tmp<900) {
+        if (tmp>250) { dir_ud=1; /*up*/} else { dir_ud=-1;/*down*/}
+      } 
+    
+      //--------------------------------------------------------------------move X
+      uint8_t mot_move=0; 
+      
+      if (dir_lr==1 && x<1030)  {          //move right
+        Xmotor->onestep(BACKWARD, DOUBLE);
+        x++;
+        mot_move=1;
+      } 
+      if (dir_lr==-1 && x>5)  {            //move left
+        Xmotor->onestep(FORWARD, DOUBLE);
+        x--;
+        mot_move=1;
+      } 
+    
+      if (!mot_move){  //Xmotor was not moved? -> delay -> and release after a timeout
+        delayMicroseconds(100);
+        if (mot_off_timeout_x<50){mot_off_timeout_x++;}
+        if (mot_off_timeout_x==49){
+          Xmotor->release();
+          if(debug)Serial.println("----Xrelease");
+        } 
+      }else{          //Xmotor was moved? -> reset timeout
+        delayMicroseconds(300);
+        mot_off_timeout_x=0;
+        drop_wait=0;
+      } 
+      
+      //--------------------------------------------------------------------move Y
+      mot_move=0;
+      
+      if (dir_ud==1 && y<760)  {            //move up
+        Ymotor->onestep(FORWARD, DOUBLE);
+        y++;
+        mot_move=1;
+      } 
+      
+      if (dir_ud==-1 && y>50)  {            //move down
+        Ymotor->onestep(BACKWARD, DOUBLE);
+        y--;
+        mot_move=1;
+      } 
+    
+      if (!mot_move){                       //motor was not moved? -> delay -> and release after a timeout
+        delayMicroseconds(100);
+        if (mot_off_timeout_y<50){mot_off_timeout_y++;}
+        if (mot_off_timeout_y==49){
+          Ymotor->release();
+          if(debug)Serial.println("----Yrelease");
+        }
+      }else{                                //motor was moved? -> reset timeout
+        mot_off_timeout_y=0;
+        drop_wait=0;
+      } 
+      
+     //-------------------------------------------------------------------- drop the apple (hello newton!)
+     if (drop_wait==10000){
+       if (drop_time==0){
+          if (drop_time_limit>5){drop_time_limit-=3;}
+          drop_time=drop_time_limit;
+        
+       if (y>50 && dir_ud!=1)  {            //move down
+          Ymotor->onestep(BACKWARD, DOUBLE);
+          y--;
+          mot_move=1;
+        } 
+      
+        if (!mot_move){                       //motor was not moved? -> delay -> and release after a timeout
+        //  delayMicroseconds(100);
+          if (mot_off_timeout_y<50){mot_off_timeout_y++;}
+          if (mot_off_timeout_y==49){
+            Ymotor->release();
+            if(debug)Serial.println("----Yrelease");
+          }
+        }else{                                //motor was not moved? -> reset timeout
+          mot_off_timeout_y=0;
+        } 
+       
+       }else{ //drop_time>0
+         drop_time--;
+       }
+     }else{
+       drop_wait++;
+       drop_time_limit=300;
+     }
+    
+    //---------------------------------------check position
+    
+    int target_x[]=    { 623,    5,    320,  638,  676,  845,  977 };
+    int target_y[]=    { 265,    308,  288,  107,  724,  597,  738 };
+    int target_dist[]= { 50,     50,   50,   50,   50,   50,   50  };
+    
+    uint8_t target=0;
+
+    for (int i=0;i<7;i++){
+      if (abs(x-target_x[i])<target_dist[i] && abs(y-target_y[i])<target_dist[i]){
+        //digitalWrite(target_pin[i],HIGH);
+        target=i+2;
+        if (debug){
+          Serial.print("Hit target #");
+          Serial.println(target);
+        }
+        else{
+      //  digitalWrite(target_pin[i],LOW);
+        }
+      }
+    }
+    
+    //transfer target info to arduino pro mini
+    if(target&0b00000001){digitalWrite(5,HIGH);}else{digitalWrite(5,LOW);}
+    if(target&0b00000010){digitalWrite(2,HIGH);}else{digitalWrite(2,LOW);}
+    if(target&0b00000100){digitalWrite(1,HIGH);}else{digitalWrite(1,LOW);}
+    if(target&0b00001000){digitalWrite(0,HIGH);}else{digitalWrite(0,LOW);}
+    
+    //----------------------------------------check joystick fire button
+    if (digitalRead(button) == LOW) { // button is pushed
+      if (musicPlayer.playingMusic)musicPlayer.stopPlaying();
+      delay(50);
+      playing_bgnd_music=false;
+      
+      switch (target) {
+      case 2:
+      musicPlayer.playFullFile("track020.mp3"); // hands
+      break;
+      case 3:
+      musicPlayer.playFullFile("track017.mp3"); // fart
+      break;
+      case 4:
+      musicPlayer.playFullFile("track015.mp3"); // boing (Adam)
+      break;
+      case 5:
+      musicPlayer.playFullFile("track018.mp3"); // cat
+      break;     
+      case 6:
+      musicPlayer.playFullFile("track001.mp3"); // evil laughter (snake)
+      break;      
+      case 7:
+      musicPlayer.startPlayingFile("track019.mp3"); // biting an apple (Eve)
+      
+      delay(3300);
+      digitalWrite(5,HIGH); //let the led controller know that hallelujah is playing
+      digitalWrite(2,HIGH);
+      digitalWrite(1,HIGH);
+      digitalWrite(0,HIGH);
+      servo01.attach(10);      // attaches the servo on pin 10 to the servo object
+      servo02.attach(9);       // attaches the servo on pin 9 to the servo object 
+      
+      for (int i=0;i<60;i++){
+         servo01.write(90+i/3); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+
+      //0.4
+      for (int i=60;i>40;i--){
+         servo01.write(90+i/3); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //.6
+      for (int i=40;i<60;i++){
+         servo01.write(90+i/3); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //.8
+      for (int i=60;i>50;i--){
+         servo01.write(90+i/3); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      
+      digitalWrite(5,LOW); 
+      digitalWrite(2,LOW);
+      digitalWrite(1,LOW);
+      digitalWrite(0,LOW);
+      
+      //1.0
+      for (int i=50;i>0;i--){
+         servo01.write(90+i/3); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(20);
+      }
+      //2
+      for (int i=0;i<50;i++){
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //2.25
+      for (int i=0;i<50;i++){
+         servo01.write(90-i); //eve 90i
+        delay(5);
+      }
+      //2.5
+      for (int i=50;i>0;i--){
+         servo01.write(90-i); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(15);
+      }
+      //3.25
+      for (int i=0;i<70;i++){
+         servo01.write(90+i/2); //eve 90i
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //4.2
+      for (int i=70;i>0;i--){
+         servo02.write(120-i); //adam 120i
+        delay(3);
+      }
+      //4.5
+      for (int i=70;i>0;i--){
+         servo01.write(90+i/2); //eve
+        delay(5);
+      }
+      //5
+      for (int i=0;i<100;i++){
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      //6
+      for (int i=0;i<100;i++){
+         servo01.write(90+i/3); //eve
+        delay(10);
+      }
+      //7
+      for (int i=100;i>0;i--){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(20);
+      }
+      //9
+      for (int i=0;i<100;i++){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //9.5
+      for (int i=100;i>50;i--){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      //10
+      for (int i=50;i<100;i++){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      //10.5
+      for (int i=100;i>00;i--){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //11
+      for (int i=0;i<50;i++){
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      //11.5
+      for (int i=0;i<50;i++){
+         servo01.write(90+i/3); //eve
+        delay(10);
+      }
+      //12
+      for (int i=50;i>0;i--){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(20);
+      }
+      //13
+      for (int i=0;i<100;i++){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      //13.5
+      for (int i=100;i>00;i--){
+         servo01.write(90+i/3); //eve
+         servo02.write(120-i); //adam 120i
+        delay(10);
+      }
+      
+      
+
+      
+      delay(100);
+
+      
+      servo01.detach();
+      servo02.detach();
+      break;      
+      case 8:
+      musicPlayer.playFullFile("track002.mp3"); //owl
+      break;
+      default: 
+      musicPlayer.playFullFile("track010.mp3"); // buzzer
+      }
+      
+      bgnd_music_timer=millis()+bgnd_music_delay; // reset bgnd music delay
+    }
+    
+    //----------------------------------------play background music
+    if(dir_ud==0&&dir_lr==0){bgnd_music_timer=millis()+bgnd_music_delay;}//no joystick movement -> reset bgnd music delay
+    
+    if (millis()>bgnd_music_timer && !playing_bgnd_music){
+      musicPlayer.startPlayingFile("track016.mp3"); // theme song
+      playing_bgnd_music=true;
+    }
+  
+}
