@@ -1,4 +1,5 @@
-// Forbidden Fruit Machine - main controller
+
+// Forbidden Fruit Machine - Arduino UNO main controller
 
 #include <Servo.h>   
 
@@ -47,8 +48,8 @@ long dropTime=0;
 //apple coordinates
 int x=0;
 int y=0;
-int initial_x=100;  //x after calibration
-int initial_y=720;    //y after calibration
+int initial_x=1000;  //x after calibration
+int initial_y=50;    //y after calibration
 uint8_t mot_off_timeout_x=0; //switch motor off after timeout
 uint8_t mot_off_timeout_y=0; //switch motor off after timeout
 boolean debug=false;//true; //
@@ -278,7 +279,53 @@ void loop() {
       
       switch (target) {
       case 2:
-      musicPlayer.playFullFile("track020.mp3"); // hands
+      musicPlayer.startPlayingFile("track020.mp3"); // hands
+      servo01.attach(10);      // attaches the servo on pin 10 to the servo object
+      servo02.attach(9);       // attaches the servo on pin 9 to the servo object 
+      
+      for (int i=0;i<10;i++){
+         servo01.write(90-i); //eve 90i
+        delay(15);
+      }
+      delay(100);
+      for (int i=10;i>0;i--){
+         servo01.write(90-i); //eve 90i
+        delay(30);
+      }
+      for (int i=0;i<15;i++){
+         servo01.write(90-i); //eve 90i
+        delay(15);
+      }
+      delay(100);
+      for (int i=15;i>0;i--){
+         servo01.write(90-i); //eve 90i
+        delay(30);
+      }
+      delay(500);
+      servo01.detach();
+      for (int i=0;i<60;i++){
+         servo02.write(120-i); //adam
+        delay(10);
+      }
+      
+      for (int i=60;i>30;i--){
+         servo02.write(120-i); //adam
+        delay(10);
+      }
+      
+      for (int i=30;i<60;i++){
+         servo02.write(120-i); //adam
+        delay(10);
+      }
+      delay(500);
+      
+      for (int i=60;i>0;i--){
+         servo02.write(120-i); //adam
+        delay(10);
+      }
+      delay(500);
+      servo02.detach();
+      
       break;
       case 3:
       musicPlayer.playFullFile("track017.mp3"); // fart
@@ -295,13 +342,39 @@ void loop() {
       case 7:
       musicPlayer.startPlayingFile("track019.mp3"); // biting an apple (Eve)
       
-      delay(3300);
+      servo01.attach(10);      // attaches the servo on pin 10 to the servo object
+      servo02.attach(9);       // attaches the servo on pin 9 to the servo object 
+      
+      
+      
+      for (int i=0;i<50;i++){
+         servo01.write(90+i/3); //eve 90i
+        delay(5);
+      }
+      delay(750);
+      //1
+     
+     for (int i=50;i>0;i--){
+         servo01.write(90+i/3); //eve 90i
+        delay(5);
+      }
+      delay(250);
+      //1.5
+      for (int i=0;i<50;i++){
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      delay(1000); 
+      for (int i=50;i>0;i--){
+         servo02.write(120-i); //adam 120i
+        delay(5);
+      }
+      delay(300);
       digitalWrite(5,HIGH); //let the led controller know that hallelujah is playing
       digitalWrite(2,HIGH);
       digitalWrite(1,HIGH);
       digitalWrite(0,HIGH);
-      servo01.attach(10);      // attaches the servo on pin 10 to the servo object
-      servo02.attach(9);       // attaches the servo on pin 9 to the servo object 
+
       
       for (int i=0;i<60;i++){
          servo01.write(90+i/3); //eve 90i
@@ -440,12 +513,8 @@ void loop() {
         delay(10);
       }
       
-      
-
-      
       delay(100);
 
-      
       servo01.detach();
       servo02.detach();
       break;      
