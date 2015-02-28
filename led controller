@@ -1,0 +1,349 @@
+
+// Forbidden Fruit Machine - LED controller
+// Code for the LED effects (8 LEDs) for Arduino Pro Mini
+// The effects are triggered from the main board (Arduino Uno)
+
+
+int pause = 1;
+uint8_t br;
+float led[10];
+uint8_t brightness[11];
+int count=0;
+
+void setup() {                
+  
+  
+  
+  // initilaize input pins
+  
+  pinMode(10, INPUT);  // connected to Arduino Uno pin 5
+  pinMode(11, INPUT);  // connected to Arduino Uno pin 2
+  pinMode(12, INPUT);  // connected to Arduino Uno pin 1
+  pinMode(13, INPUT);  // connected to Arduino Uno pin 0
+  
+  // initialize LED pins as outputs
+  pinMode(2, OUTPUT);  // add here to which parts of the image the LEDs are connected
+  pinMode(3, OUTPUT);  // 
+  pinMode(4, OUTPUT);  // 
+  pinMode(5, OUTPUT);  // 
+  pinMode(6, OUTPUT);  // 
+  pinMode(7, OUTPUT);  // 
+  pinMode(8, OUTPUT);  // 
+  pinMode(9, OUTPUT);  // 
+  pinMode(16, OUTPUT); // connected to analog pin A2 / digital pin 16
+  
+  delay(2000); 
+}
+
+
+void loop() {
+  uint8_t target=PINB>>2;       // retrieve target position from main controller
+
+  if (target==15){
+   //hallelujah thunder action
+     for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(20);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(60);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(20);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(60);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);
+          delay(20);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(60);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(80);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(70);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+
+            delay(30);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+              delay(30);       for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<15;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(16-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(50);       delay(30);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(300);
+     delay(70);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(80);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(90);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(10);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(80);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(70);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(60);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(40);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(70);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(20);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(10);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(90);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}     
+     delay(30);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+     delay(70);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(60);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(30);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(50);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(80);for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+     delay(20);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+     delay(200);
+
+       for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(200);
+              for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(150);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<15;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(16-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+       delay(450);
+              for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(300);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+       delay(300);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<15;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(16-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+       delay(200);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(200);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(400);
+       for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+              for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(550);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<15;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(16-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(150);
+       delay(700);
+              for (int i=0;i<15;i++){  
+         delay(16-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(450);       for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(650);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<15;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(16-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(30);
+       delay(350);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       delay(600);
+              for (int i=0;i<10;i++){  
+         delay(11-i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+       for (int i=0;i<10;i++){  
+         delay(i);   for (uint8_t i=2;i<10;i++){digitalWrite(i, HIGH);}
+         delay(11-i);for (uint8_t i=2;i<10;i++){digitalWrite(i, LOW);}
+       }
+      delay(100);
+      for (int i=2;i<10; i++){    // reset led values
+      led[i]=0;
+      }
+
+}
+    
+  if (target>1 && target<10){   // apple over target
+    for (int i=2;i<10; i++){    // reset led values
+      if (led[i]>.001)led[i]-=.001;
+    }
+  
+  
+  switch (target) { //set led values according to retrieved target
+  case 2: // apple position
+    led[2]=1;
+    led[9]=1;
+    break;
+  case 3: // fart
+    led[7]=1;
+    break;  
+  case 4: // pipi
+    led[6]=1;
+    break;
+  case 5: // cat
+    led[5]=1;
+    break;  
+  case 6: // snake
+    led[8]=1;
+    break;  
+  case 7: //eve
+    led[4]=1;
+    break;
+  case 8: // owl
+    led[3]=1;
+    break;
+  }
+  }else{ // apple not over target
+    for (int i=2;i<10; i++){ //reset led values
+      if (led[i]<1)led[i]+=.001;
+    }
+  }
+
+    // switching LED brightness varies sinusoidally so that the brightness for each LED is at different phase
+    for (uint8_t i=2;i<10;i++){
+       float time=float(millis())/400;//divider determines general speed of fading - the higher - the slower
+       float temp_brightness=(sin(time+i)+1)*50; //cycling with same frequency+ different shifted phase
+       temp_brightness=temp_brightness*led[i];
+       brightness[i] = temp_brightness;
+    }
+    
+    for (uint8_t i=2;i<10;i++){ // all LED's on
+      digitalWrite(i, HIGH);
+    }
+    
+    digitalWrite(16, HIGH); // NOTE: this LED just stays in now, does not vary the brighness
+    
+    for (uint8_t t=0;t<=100;t++){ //100 different brightnesses possible, stored in br[] for each LED
+      for (uint8_t i=2;i<10;i++){ //switching LED off when it was on for long enough time
+      if (i<10){if (t==brightness[i]) digitalWrite(i, LOW);}else{if (t==brightness[i]) digitalWrite(16, LOW);}
+        
+      }
+      delayMicroseconds(5); //wait a bit
+    }
+}
+
+
+ 
+
+   
+
